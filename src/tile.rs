@@ -1,17 +1,17 @@
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum Value {
     Number(i32),
     Mine,
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum State {
     Opened,
     Closed,
     Flagged,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Tile {
     value: Value,
     state: State,
@@ -43,5 +43,9 @@ impl Tile {
         if self.state == State::Closed {
             self.state = State::Flagged;
         }
+    }
+
+    pub fn replace_value(&mut self, value: Value) {
+        self.value = value;
     }
 }
