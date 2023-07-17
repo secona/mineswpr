@@ -14,6 +14,17 @@ impl Board {
         for _ in 0..mine_count {
             let random = Point::random(0..width, 0..height);
             tiles[random.x][random.y].replace_value(tile::Value::Mine);
+
+            for neighbor in random.neighbors() {
+                if neighbor.x >= width || neighbor.y >= height {
+                    continue;
+                }
+
+                let tile = &mut tiles[neighbor.x][neighbor.y];
+                if let tile::Value::Number(num) = tile.value() {
+                    tile.replace_value(tile::Value::Number(num + 1))
+                }
+            }
         }
 
         Self {

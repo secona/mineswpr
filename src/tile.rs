@@ -48,4 +48,8 @@ impl Tile {
     pub fn replace_value(&mut self, value: Value) {
         self.value = value;
     }
+
+    pub fn value(&self) -> Value {
+        self.value
+    }
 }
