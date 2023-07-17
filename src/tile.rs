@@ -1,16 +1,17 @@
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum Value {
     Number(i32),
     Mine,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum State {
     Opened,
     Closed,
     Flagged,
 }
 
+#[derive(Clone, Copy)]
 pub struct Tile {
     value: Value,
     state: State,
