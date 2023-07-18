@@ -2,7 +2,7 @@ use crate::{point::Point, tile};
 
 #[derive(Debug)]
 pub struct Board {
-    tiles: Vec<Vec<tile::Tile>>,
+    pub tiles: Vec<Vec<tile::Tile>>,
     width: usize,
     height: usize,
 }
