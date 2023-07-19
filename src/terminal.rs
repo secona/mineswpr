@@ -22,6 +22,22 @@ impl From<&Board> for Cursor {
     }
 }
 
+impl Cursor {
+    pub fn mut_move(&mut self, x: i32, y: i32) {
+        self.position.x = self
+            .position
+            .x
+            .saturating_add_signed(x as isize)
+            .clamp(0, self.max.x - 1);
+
+        self.position.y = self
+            .position
+            .y
+            .saturating_add_signed(y as isize)
+            .clamp(0, self.max.y - 1);
+    }
+}
+
 pub struct Terminal {
     board: Board,
     should_quit: bool,
@@ -103,6 +119,10 @@ impl Terminal {
 
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
+            Key::Up => self.cursor.mut_move(0, -1),
+            Key::Down => self.cursor.mut_move(0, 1),
+            Key::Right => self.cursor.mut_move(1, 0),
+            Key::Left => self.cursor.mut_move(-1, 0),
             _ => {}
         }
     }
