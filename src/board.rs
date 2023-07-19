@@ -37,6 +37,6 @@ impl Board {
     }
 
     fn tile_at(&mut self, point: &Point) -> &mut tile::Tile {
-        &mut self.tiles[point.x][point.y]
+        &mut self.tiles[point.y][point.x]
     }
 }
