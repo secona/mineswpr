@@ -4,13 +4,30 @@ use termion::input::TermRead;
 use termion::raw::{IntoRawMode, RawTerminal};
 
 use crate::board::Board;
+use crate::point::Point;
 use crate::tile;
+
+#[derive(PartialEq)]
+struct Cursor {
+    position: Point,
+    max: Point,
+}
+
+impl From<&Board> for Cursor {
+    fn from(value: &Board) -> Self {
+        Self {
+            position: Point::default(),
+            max: Point::new(value.width, value.height),
+        }
+    }
+}
 
 pub struct Terminal {
     board: Board,
     should_quit: bool,
     width: usize,
     height: usize,
+    cursor: Cursor,
     _stdout: RawTerminal<io::Stdout>,
 }
 
@@ -19,10 +36,11 @@ impl Terminal {
         let term_size = termion::terminal_size().unwrap();
 
         Self {
-            board,
             width: term_size.0 as usize,
             height: term_size.1 as usize,
             should_quit: false,
+            cursor: Cursor::from(&board),
+            board,
             _stdout: io::stdout().into_raw_mode().unwrap(),
         }
     }
@@ -54,13 +72,19 @@ impl Terminal {
             return;
         }
 
-        for row in &self.board.tiles {
+        for (y, row) in self.board.tiles.iter().enumerate() {
             let mut result: Vec<String> = Vec::new();
-            for tile in row {
-                match tile.value() {
-                    tile::Value::Number(n) => result.push(n.to_string()),
-                    tile::Value::Mine => result.push("X".to_string()),
+            for (x, tile) in row.iter().enumerate() {
+                let mut tile = match tile.value() {
+                    tile::Value::Number(n) => n.to_string(),
+                    tile::Value::Mine => "X".to_string(),
+                };
+
+                if self.cursor.position == Point::new(x, y) {
+                    tile = Terminal::bg_color_str(&tile, termion::color::Yellow);
                 }
+
+                result.push(tile);
             }
             let result = result.join(" ");
             println!("{}{}\r", result, " ".repeat(self.width - result.len()));
@@ -109,6 +133,15 @@ impl Terminal {
 
     pub fn cursor_goto(x: u16, y: u16) {
         print!("{}", termion::cursor::Goto(x, y));
+    }
+
+    pub fn bg_color_str(val: &str, color: impl termion::color::Color) -> String {
+        format!(
+            "{}{}{}",
+            termion::color::Bg(color),
+            val,
+            termion::color::Bg(termion::color::Reset)
+        )
     }
 
     pub fn flush() {

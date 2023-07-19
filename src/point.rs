@@ -9,12 +9,17 @@ fn add(lhs: usize, rhs: i32) -> Option<usize> {
     }
 }
 
+#[derive(Default, PartialEq)]
 pub struct Point<T = usize> {
     pub x: T,
     pub y: T,
 }
 
 impl Point<usize> {
+    pub fn new(x: usize, y: usize) -> Self {
+        Self { x, y }
+    }
+
     pub fn random(x_range: Range<usize>, y_range: Range<usize>) -> Self {
         let mut rng = rand::thread_rng();
         Self {
