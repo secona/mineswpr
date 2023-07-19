@@ -1,14 +1,6 @@
 use rand::Rng;
 use std::ops::{Range, RangeInclusive};
 
-fn add(lhs: usize, rhs: i32) -> Option<usize> {
-    if rhs.is_negative() {
-        lhs.checked_sub(rhs.wrapping_abs() as usize)
-    } else {
-        lhs.checked_add(rhs as usize)
-    }
-}
-
 #[derive(Default, PartialEq)]
 pub struct Point<T = usize> {
     pub x: T,
@@ -36,12 +28,12 @@ impl Point<usize> {
                     continue;
                 }
 
-                let x = match add(self.x, i) {
+                let x = match self.x.checked_add_signed(i as isize) {
                     Some(value) => value,
                     None => continue,
                 };
 
-                let y = match add(self.y, j) {
+                let y = match self.y.checked_add_signed(j as isize) {
                     Some(value) => value,
                     None => continue,
                 };
