@@ -67,7 +67,7 @@ impl Terminal {
         }
 
         let full_width_spaces = " ".repeat(self.width);
-        for _ in 0..(self.height - self.board.tiles.len() - 1) {
+        for _ in 0..(self.height - self.board.height - 1) {
             println!("{}\r", full_width_spaces);
         }
 

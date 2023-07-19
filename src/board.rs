@@ -3,8 +3,8 @@ use crate::{point::Point, tile};
 #[derive(Debug)]
 pub struct Board {
     pub tiles: Vec<Vec<tile::Tile>>,
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
 }
 
 impl Board {
