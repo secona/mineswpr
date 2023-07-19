@@ -91,9 +91,13 @@ impl Terminal {
         for (y, row) in self.board.tiles.iter().enumerate() {
             let mut result: Vec<String> = Vec::new();
             for (x, tile) in row.iter().enumerate() {
-                let mut tile = match tile.value() {
-                    tile::Value::Number(n) => n.to_string(),
-                    tile::Value::Mine => "X".to_string(),
+                let mut tile = match tile.state() {
+                    tile::State::Opened => match tile.value() {
+                        tile::Value::Number(n) => n.to_string(),
+                        tile::Value::Mine => "X".to_string(),
+                    },
+                    tile::State::Closed => "?".to_string(),
+                    tile::State::Flagged => "F".to_string(),
                 };
 
                 if self.cursor.position == Point::new(x, y) {
@@ -123,6 +127,12 @@ impl Terminal {
             Key::Down => self.cursor.mut_move(0, 1),
             Key::Right => self.cursor.mut_move(1, 0),
             Key::Left => self.cursor.mut_move(-1, 0),
+            Key::Char(' ') => self
+                .board
+                .tile_at(&self.cursor.position)
+                .open()
+                .unwrap_or_else(|()| self.should_quit = true),
+            Key::Char('f') => self.board.tile_at(&self.cursor.position).flag(),
             _ => {}
         }
     }

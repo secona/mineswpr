@@ -42,6 +42,8 @@ impl Tile {
     pub fn flag(&mut self) {
         if self.state == State::Closed {
             self.state = State::Flagged;
+        } else if self.state == State::Flagged {
+            self.state = State::Closed;
         }
     }
 
@@ -51,5 +53,9 @@ impl Tile {
 
     pub fn value(&self) -> Value {
         self.value
+    }
+
+    pub fn state(&self) -> State {
+        self.state
     }
 }
