@@ -10,6 +10,7 @@ pub struct Board {
 impl Board {
     pub fn new(width: usize, height: usize, mine_count: usize) -> Self {
         let tiles = vec![vec![tile::Tile::default(); width]; height];
+        let mut mine_points: Vec<Point> = Vec::new();
 
         let mut result = Self {
             tiles,
@@ -17,19 +18,24 @@ impl Board {
             width,
         };
 
-        for _ in 0..mine_count {
+        while mine_points.len() < mine_count {
             let random = Point::random(0..width, 0..height);
-            result.tile_at(&random).replace_value(tile::Value::Mine);
 
-            for neighbor in random.neighbors() {
-                if neighbor.x >= width || neighbor.y >= height {
-                    continue;
+            if !mine_points.contains(&random) {
+                result.tile_at(&random).replace_value(tile::Value::Mine);
+
+                for neighbor in random.neighbors() {
+                    if neighbor.x >= width || neighbor.y >= height {
+                        continue;
+                    }
+
+                    let tile = &mut result.tile_at(&neighbor);
+                    if let tile::Value::Number(num) = tile.value() {
+                        tile.replace_value(tile::Value::Number(num + 1))
+                    }
                 }
 
-                let tile = &mut result.tile_at(&neighbor);
-                if let tile::Value::Number(num) = tile.value() {
-                    tile.replace_value(tile::Value::Number(num + 1))
-                }
+                mine_points.push(random);
             }
         }
 
