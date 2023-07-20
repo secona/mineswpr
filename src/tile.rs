@@ -34,14 +34,14 @@ impl Default for Tile {
 
 impl Tile {
     pub fn open(&mut self) -> Result<(), OpenError> {
-        if self.value == Value::Mine {
-            return Err(OpenError::Mine);
-        }
-
         match self.state {
             State::Closed => self.state = State::Opened,
             State::Flagged => return Err(OpenError::Flagged),
             State::Opened => return Err(OpenError::Opened),
+        }
+
+        if self.value == Value::Mine {
+            return Err(OpenError::Mine);
         }
 
         Ok(())
