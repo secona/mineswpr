@@ -91,23 +91,17 @@ impl Terminal {
         for (y, row) in self.board.tiles.iter().enumerate() {
             let mut result: Vec<String> = Vec::new();
             for (x, tile) in row.iter().enumerate() {
-                let mut tile = match tile.state() {
-                    tile::State::Opened => match tile.value() {
-                        tile::Value::Number(n) => n.to_string(),
-                        tile::Value::Mine => "X".to_string(),
-                    },
-                    tile::State::Closed => "?".to_string(),
-                    tile::State::Flagged => "F".to_string(),
-                };
+                let mut tile = self.color_tile(tile);
 
                 if self.cursor.position == Point::new(x, y) {
-                    tile = Terminal::bg_color_str(&tile, termion::color::Yellow);
+                    tile = Terminal::bg_color_str(&tile, termion::color::White);
                 }
 
                 result.push(tile);
             }
             let result = result.join(" ");
-            println!("{}{}\r", result, " ".repeat(self.width - result.len()));
+            // println!("{}{}\r", result, " ".repeat(self.width - result.len()));
+            println!("{}\r", result);
         }
 
         let full_width_spaces = " ".repeat(self.width);
@@ -116,6 +110,31 @@ impl Terminal {
         }
 
         Terminal::flush();
+    }
+
+    fn color_tile(&self, tile: &tile::Tile) -> String {
+        match tile.state() {
+            tile::State::Opened => match tile.value() {
+                tile::Value::Number(n) => {
+                    let value = &n.to_string();
+                    match n {
+                        0 => String::from(" "), // transparent color
+                        1 => Terminal::fg_color_str(value, termion::color::LightBlue),
+                        2 => Terminal::fg_color_str(value, termion::color::Green),
+                        3 => Terminal::fg_color_str(value, termion::color::Red),
+                        4 => Terminal::fg_color_str(value, termion::color::Blue),
+                        5 => Terminal::fg_color_str(value, termion::color::Magenta),
+                        6 => Terminal::fg_color_str(value, termion::color::Cyan),
+                        7 => Terminal::fg_color_str(value, termion::color::LightCyan),
+                        8 => Terminal::fg_color_str(value, termion::color::Yellow),
+                        _ => value.to_owned(),
+                    }
+                }
+                tile::Value::Mine => Terminal::fg_color_str("X", termion::color::Red),
+            },
+            tile::State::Closed => Terminal::fg_color_str("?", termion::color::LightBlack),
+            tile::State::Flagged => Terminal::fg_color_str("F", termion::color::Rgb(200, 0, 200)),
+        }
     }
 
     fn handle_keypress(&mut self) {
@@ -170,6 +189,15 @@ impl Terminal {
             termion::color::Bg(color),
             val,
             termion::color::Bg(termion::color::Reset)
+        )
+    }
+
+    pub fn fg_color_str(val: &str, color: impl termion::color::Color) -> String {
+        format!(
+            "{}{}{}",
+            termion::color::Fg(color),
+            val,
+            termion::color::Fg(termion::color::Reset)
         )
     }
 
