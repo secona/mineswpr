@@ -99,9 +99,13 @@ impl Terminal {
 
                 result.push(tile);
             }
+
             let result = result.join(" ");
-            // println!("{}{}\r", result, " ".repeat(self.width - result.len()));
-            println!("{}\r", result);
+            println!(
+                "{}{}\r",
+                result,
+                " ".repeat(self.width - (self.board.width * 2 - 1))
+            );
         }
 
         let full_width_spaces = " ".repeat(self.width);
