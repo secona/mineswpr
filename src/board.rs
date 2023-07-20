@@ -5,6 +5,7 @@ pub struct Board {
     pub tiles: Vec<Vec<tile::Tile>>,
     pub width: usize,
     pub height: usize,
+    pub mine_count: usize,
 }
 
 impl Board {
@@ -16,6 +17,7 @@ impl Board {
             tiles,
             height,
             width,
+            mine_count,
         };
 
         while mine_points.len() < mine_count {
@@ -40,6 +42,10 @@ impl Board {
         }
 
         result
+    }
+
+    pub fn restart(&mut self) {
+        *self = Board::new(self.width, self.height, self.mine_count);
     }
 
     pub fn tile_at(&mut self, point: &Point) -> &mut tile::Tile {

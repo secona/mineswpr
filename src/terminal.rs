@@ -145,7 +145,8 @@ impl Terminal {
         let pressed_key = Terminal::read_key().unwrap();
 
         match pressed_key {
-            Key::Ctrl('q') => self.should_quit = true,
+            Key::Ctrl('q') => self.quit(),
+            Key::Ctrl('r') => self.restart(),
             Key::Up => self.cursor.mut_move(0, -1),
             Key::Down => self.cursor.mut_move(0, 1),
             Key::Right => self.cursor.mut_move(1, 0),
@@ -153,10 +154,18 @@ impl Terminal {
             Key::Char(' ') => self
                 .board
                 .open_tile(&self.cursor.position)
-                .unwrap_or_else(|()| self.should_quit = true),
+                .unwrap_or_else(|()| self.quit()),
             Key::Char('f') => self.board.tile_at(&self.cursor.position).flag(),
             _ => {}
         }
+    }
+
+    fn quit(&mut self) {
+        self.should_quit = true;
+    }
+
+    fn restart(&mut self) {
+        self.board.restart();
     }
 
     pub fn read_key() -> Result<Key, io::Error> {
