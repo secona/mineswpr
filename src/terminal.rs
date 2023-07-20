@@ -41,6 +41,7 @@ impl Cursor {
 pub struct Terminal {
     board: Board,
     should_quit: bool,
+    game_over: bool,
     width: usize,
     height: usize,
     cursor: Cursor,
@@ -55,6 +56,7 @@ impl Terminal {
             width: term_size.0 as usize,
             height: term_size.1 as usize,
             should_quit: false,
+            game_over: false,
             cursor: Cursor::from(&board),
             board,
             _stdout: io::stdout().into_raw_mode().unwrap(),
@@ -84,7 +86,11 @@ impl Terminal {
         if self.should_quit {
             Terminal::cursor_goto(1, 1);
             Terminal::clear_after_cursor();
-            println!("Goodbye.");
+            if self.game_over {
+                println!("Game Over. You Lost. Thank you for playing.");
+            } else {
+                println!("Goodbye. Thank you for playing.");
+            }
             return;
         }
 
@@ -154,7 +160,7 @@ impl Terminal {
             Key::Char(' ') => self
                 .board
                 .open_tile(&self.cursor.position)
-                .unwrap_or_else(|()| self.quit()),
+                .unwrap_or_else(|()| self.game_over()),
             Key::Char('f') => self.board.tile_at(&self.cursor.position).flag(),
             _ => {}
         }
@@ -162,6 +168,11 @@ impl Terminal {
 
     fn quit(&mut self) {
         self.should_quit = true;
+    }
+
+    fn game_over(&mut self) {
+        self.should_quit = true;
+        self.game_over = true;
     }
 
     fn restart(&mut self) {
