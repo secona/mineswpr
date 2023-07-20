@@ -129,8 +129,7 @@ impl Terminal {
             Key::Left => self.cursor.mut_move(-1, 0),
             Key::Char(' ') => self
                 .board
-                .tile_at(&self.cursor.position)
-                .open()
+                .open_tile(&self.cursor.position)
                 .unwrap_or_else(|()| self.should_quit = true),
             Key::Char('f') => self.board.tile_at(&self.cursor.position).flag(),
             _ => {}

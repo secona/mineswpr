@@ -1,3 +1,9 @@
+pub enum OpenError {
+    Flagged,
+    Opened,
+    Mine,
+}
+
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum Value {
     Number(i32),
@@ -27,13 +33,15 @@ impl Default for Tile {
 }
 
 impl Tile {
-    pub fn open(&mut self) -> Result<(), ()> {
+    pub fn open(&mut self) -> Result<(), OpenError> {
         if self.value == Value::Mine {
-            return Err(());
+            return Err(OpenError::Mine);
         }
 
-        if self.state == State::Closed {
-            self.state = State::Opened;
+        match self.state {
+            State::Closed => self.state = State::Opened,
+            State::Flagged => return Err(OpenError::Flagged),
+            State::Opened => return Err(OpenError::Opened),
         }
 
         Ok(())

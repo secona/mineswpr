@@ -39,4 +39,29 @@ impl Board {
     pub fn tile_at(&mut self, point: &Point) -> &mut tile::Tile {
         &mut self.tiles[point.y][point.x]
     }
+
+    pub fn open_tile(&mut self, point: &Point) -> Result<(), ()> {
+        let tile = self.tile_at(point);
+        match tile.open() {
+            Ok(_) => {
+                if let tile::Value::Number(0) = tile.value() {
+                    for neighbor in point.neighbors() {
+                        if neighbor.x >= self.width || neighbor.y >= self.height {
+                            continue;
+                        }
+
+                        if let tile::State::Closed = self.tile_at(&neighbor).state() {
+                            self.open_tile(&neighbor)?;
+                        }
+                    }
+                }
+            }
+            Err(kind) => match kind {
+                tile::OpenError::Mine => return Err(()),
+                _ => {}
+            },
+        };
+
+        Ok(())
+    }
 }
