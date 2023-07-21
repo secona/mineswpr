@@ -48,6 +48,21 @@ impl Board {
         *self = Board::new(self.width, self.height, self.mine_count);
     }
 
+    pub fn has_won(&self) -> bool {
+        for row in self.tiles.iter() {
+            for tile in row.iter() {
+                if let tile::Value::Number(_) = tile.value() {
+                    if let tile::State::Opened = tile.state() {
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
+    }
+
     pub fn tile_at(&mut self, point: &Point) -> &mut tile::Tile {
         &mut self.tiles[point.y][point.x]
     }

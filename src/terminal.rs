@@ -187,19 +187,10 @@ impl Terminal {
     }
 
     fn check_for_win(&mut self) {
-        self.win = true;
-        for row in self.board.tiles.iter() {
-            for tile in row.iter() {
-                if let tile::Value::Number(_) = tile.value() {
-                    if let tile::State::Opened = tile.state() {
-                    } else {
-                        self.win = false;
-                        return;
-                    }
-                }
-            }
+        self.win = self.board.has_won();
+        if self.win {
+            self.cursor.lock();
         }
-        self.cursor.lock();
     }
 
     fn quit(&mut self) {
