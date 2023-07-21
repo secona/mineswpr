@@ -155,12 +155,20 @@ impl Terminal {
         );
         println!(
             "Press {} to open a tile.\r",
-            Terminal::fg_color_str("<space>", key_color)
+            Terminal::fg_color_str("space", key_color)
         );
         println!(
             "Press {} to flag a tile.\r",
             Terminal::fg_color_str("F", key_color)
-        )
+        );
+        println!(
+            "Press {} to restart the game.\r",
+            Terminal::fg_color_str("ctrl + r", key_color)
+        );
+        println!(
+            "Press {} to quit the game.\r",
+            Terminal::fg_color_str("ctrl + q", key_color)
+        );
     }
 
     fn color_tile(&self, tile: &tile::Tile) -> String {
