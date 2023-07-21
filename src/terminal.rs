@@ -50,11 +50,21 @@ impl Cursor {
     }
 }
 
+enum GameState {
+    Running,
+    Stopped,
+}
+
+enum GameResult {
+    Win,
+    Lose,
+    Pending,
+}
+
 pub struct Terminal {
     board: Board,
-    should_quit: bool,
-    game_over: bool,
-    win: bool,
+    state: GameState,
+    result: GameResult,
     width: usize,
     height: usize,
     cursor: Cursor,
@@ -68,9 +78,8 @@ impl Terminal {
         Self {
             width: term_size.0 as usize,
             height: term_size.1 as usize,
-            should_quit: false,
-            game_over: false,
-            win: false,
+            state: GameState::Running,
+            result: GameResult::Pending,
             cursor: Cursor::from(&board),
             board,
             _stdout: io::stdout().into_raw_mode().unwrap(),
@@ -84,7 +93,7 @@ impl Terminal {
         loop {
             self.refresh_screen();
 
-            if self.should_quit == true {
+            if let GameState::Stopped = self.state {
                 break;
             }
 
@@ -98,7 +107,7 @@ impl Terminal {
     fn refresh_screen(&self) {
         Terminal::cursor_goto(1, 1);
 
-        if self.should_quit {
+        if let GameState::Stopped = self.state {
             Terminal::cursor_goto(1, 1);
             Terminal::clear_after_cursor();
             println!("Goodbye. Thank you for playing.");
@@ -135,12 +144,14 @@ impl Terminal {
     }
 
     fn draw_message(&self) {
-        let message = if self.game_over {
-            Terminal::fg_color_str("Game Over! You Lost!\r", termion::color::LightRed)
-        } else if self.win {
-            Terminal::fg_color_str("Congratulations! You Won!\r", termion::color::LightGreen)
-        } else {
-            " ".repeat(self.width)
+        let message = match self.result {
+            GameResult::Win => {
+                Terminal::fg_color_str("Congratulations! You Won!\r", termion::color::LightGreen)
+            }
+            GameResult::Lose => {
+                Terminal::fg_color_str("Game Over! You Lost!\r", termion::color::LightRed)
+            }
+            _ => " ".repeat(self.width),
         };
 
         println!("\n\r{}\n\r\r", message);
@@ -216,24 +227,25 @@ impl Terminal {
     }
 
     fn check_for_win(&mut self) {
-        self.win = self.board.has_won();
-        if self.win {
+        if self.board.has_won() {
+            self.result = GameResult::Win;
             self.cursor.lock();
         }
     }
 
     fn quit(&mut self) {
-        self.should_quit = true;
+        self.state = GameState::Stopped;
     }
 
     fn game_over(&mut self) {
-        self.game_over = true;
+        self.result = GameResult::Lose;
         self.cursor.lock();
     }
 
     fn restart(&mut self) {
+        self.state = GameState::Running;
+        self.result = GameResult::Pending;
         self.board.restart();
-        self.game_over = false;
         self.cursor.unlock();
     }
 
