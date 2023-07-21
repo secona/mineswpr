@@ -106,6 +106,13 @@ impl Terminal {
             return;
         }
 
+        self.draw_board();
+        self.draw_message();
+
+        Terminal::flush();
+    }
+
+    fn draw_board(&self) {
         for (y, row) in self.board.tiles.iter().enumerate() {
             let mut result: Vec<String> = Vec::new();
             for (x, tile) in row.iter().enumerate() {
@@ -118,28 +125,24 @@ impl Terminal {
                 result.push(tile);
             }
 
-            let result = result.join(" ");
             println!(
                 "{}{}\r",
-                result,
+                result.join(" "),
                 " ".repeat(self.width - (self.board.width * 2 - 1))
             );
         }
+    }
 
-        if self.game_over {
-            println!("Game Over! Press ctrl+r to restart.\r");
-        }
+    fn draw_message(&self) {
+        let message = if self.game_over {
+            "Game Over!\r".to_string()
+        } else if self.win {
+            "Congratulations! You Won!\r".to_string()
+        } else {
+            " ".repeat(self.width)
+        };
 
-        if self.win {
-            println!("You Won! Press ctrl+r to play again.\r");
-        }
-
-        let full_width_spaces = " ".repeat(self.width);
-        for _ in 0..(self.height - self.board.height - 2) {
-            println!("{}\r", full_width_spaces);
-        }
-
-        Terminal::flush();
+        println!("{}\r", message);
     }
 
     fn color_tile(&self, tile: &tile::Tile) -> String {
