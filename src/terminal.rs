@@ -11,6 +11,7 @@ use crate::tile;
 struct Cursor {
     position: Point,
     max: Point,
+    locked: bool,
 }
 
 impl From<&Board> for Cursor {
@@ -18,23 +19,34 @@ impl From<&Board> for Cursor {
         Self {
             position: Point::default(),
             max: Point::new(value.width, value.height),
+            locked: false,
         }
     }
 }
 
 impl Cursor {
     pub fn mut_move(&mut self, x: i32, y: i32) {
-        self.position.x = self
-            .position
-            .x
-            .saturating_add_signed(x as isize)
-            .clamp(0, self.max.x - 1);
+        if !self.locked {
+            self.position.x = self
+                .position
+                .x
+                .saturating_add_signed(x as isize)
+                .clamp(0, self.max.x - 1);
 
-        self.position.y = self
-            .position
-            .y
-            .saturating_add_signed(y as isize)
-            .clamp(0, self.max.y - 1);
+            self.position.y = self
+                .position
+                .y
+                .saturating_add_signed(y as isize)
+                .clamp(0, self.max.y - 1);
+        }
+    }
+
+    pub fn lock(&mut self) {
+        self.locked = true;
+    }
+
+    pub fn unlock(&mut self) {
+        self.locked = false;
     }
 }
 
@@ -86,11 +98,8 @@ impl Terminal {
         if self.should_quit {
             Terminal::cursor_goto(1, 1);
             Terminal::clear_after_cursor();
-            if self.game_over {
-                println!("Game Over. You Lost. Thank you for playing.");
-            } else {
-                println!("Goodbye. Thank you for playing.");
-            }
+            println!("Goodbye. Thank you for playing.");
+
             return;
         }
 
@@ -114,8 +123,12 @@ impl Terminal {
             );
         }
 
+        if self.game_over {
+            println!("Game Over! Press ctrl+r to restart\r");
+        }
+
         let full_width_spaces = " ".repeat(self.width);
-        for _ in 0..(self.height - self.board.height - 1) {
+        for _ in 0..(self.height - self.board.height - 2) {
             println!("{}\r", full_width_spaces);
         }
 
@@ -171,12 +184,14 @@ impl Terminal {
     }
 
     fn game_over(&mut self) {
-        self.should_quit = true;
         self.game_over = true;
+        self.cursor.lock();
     }
 
     fn restart(&mut self) {
         self.board.restart();
+        self.game_over = false;
+        self.cursor.unlock();
     }
 
     pub fn read_key() -> Result<Key, io::Error> {
