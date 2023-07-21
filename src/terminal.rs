@@ -108,6 +108,7 @@ impl Terminal {
 
         self.draw_board();
         self.draw_message();
+        self.draw_help_message();
 
         Terminal::flush();
     }
@@ -135,14 +136,31 @@ impl Terminal {
 
     fn draw_message(&self) {
         let message = if self.game_over {
-            "Game Over!\r".to_string()
+            Terminal::fg_color_str("Game Over! You Lost!\r", termion::color::LightRed)
         } else if self.win {
-            "Congratulations! You Won!\r".to_string()
+            Terminal::fg_color_str("Congratulations! You Won!\r", termion::color::LightGreen)
         } else {
             " ".repeat(self.width)
         };
 
-        println!("{}\r", message);
+        println!("\n\r{}\n\r\r", message);
+    }
+
+    fn draw_help_message(&self) {
+        let key_color = termion::color::LightBlue;
+
+        println!(
+            "Press {} to move cursor.\r",
+            Terminal::fg_color_str("arrow keys", key_color)
+        );
+        println!(
+            "Press {} to open a tile.\r",
+            Terminal::fg_color_str("<space>", key_color)
+        );
+        println!(
+            "Press {} to flag a tile.\r",
+            Terminal::fg_color_str("F", key_color)
+        )
     }
 
     fn color_tile(&self, tile: &tile::Tile) -> String {
