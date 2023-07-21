@@ -54,6 +54,7 @@ pub struct Terminal {
     board: Board,
     should_quit: bool,
     game_over: bool,
+    win: bool,
     width: usize,
     height: usize,
     cursor: Cursor,
@@ -69,6 +70,7 @@ impl Terminal {
             height: term_size.1 as usize,
             should_quit: false,
             game_over: false,
+            win: false,
             cursor: Cursor::from(&board),
             board,
             _stdout: io::stdout().into_raw_mode().unwrap(),
@@ -87,6 +89,7 @@ impl Terminal {
             }
 
             self.handle_keypress();
+            self.check_for_win();
         }
 
         Terminal::cursor_show();
@@ -124,7 +127,11 @@ impl Terminal {
         }
 
         if self.game_over {
-            println!("Game Over! Press ctrl+r to restart\r");
+            println!("Game Over! Press ctrl+r to restart.\r");
+        }
+
+        if self.win {
+            println!("You Won! Press ctrl+r to play again.\r");
         }
 
         let full_width_spaces = " ".repeat(self.width);
@@ -177,6 +184,22 @@ impl Terminal {
             Key::Char('f') => self.board.tile_at(&self.cursor.position).flag(),
             _ => {}
         }
+    }
+
+    fn check_for_win(&mut self) {
+        self.win = true;
+        for row in self.board.tiles.iter() {
+            for tile in row.iter() {
+                if let tile::Value::Number(_) = tile.value() {
+                    if let tile::State::Opened = tile.state() {
+                    } else {
+                        self.win = false;
+                        return;
+                    }
+                }
+            }
+        }
+        self.cursor.lock();
     }
 
     fn quit(&mut self) {
